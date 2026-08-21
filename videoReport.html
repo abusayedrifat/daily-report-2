@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="videoReportStyle.css" />
+    <title>Mediverse Video Upload Report</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="btn-container" style="margin-bottom: 10px">
+        <a href="./index.html" style="text-decoration: none; color: white">
+          <button class="btn btn-generate">Enrollments</button>
+        </a>
+        <a href="#" style="text-decoration: none; color: white">
+          <button class="btn btn-generate">Video Uploads</button>
+        </a>
+      </div>
+
+      <!-- Input Page -->
+      <div class="page active" id="inputPage">
+        <div class="input-section">
+          <h1> <span style="-webkit-text-fill-color:black;">🎥</span>  Mediverse Video Upload Report</h1>
+
+          <div class="date-selector">
+            <label for="reportDate"><strong>Select Date:</strong></label>
+            <input type="date" id="reportDate" />
+          </div>
+
+          <div class="video-section">
+            <div class="video-grid" id="courseGrid"></div>
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-generate" onclick="generateReport()">
+              Generate Report
+            </button>
+            <button class="btn btn-reset" onclick="resetForm()">
+              Reset All
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Page -->
+      <div class="page" id="reportPage">
+        <div class="report-section">
+          <div class="report-header">
+            <h1> <span style="-webkit-text-fill-color:black;">🎥</span>  Video Upload Report</h1>
+            <div class="report-date" id="reportDateDisplay"></div>
+          </div>
+          <div id="reportContent"></div>
+
+          <div class="button-group">
+            <button class="btn btn-back" onclick="showPage('inputPage')">
+              ← Back to Form
+            </button>
+            <button class="btn btn-reset" onclick="resetAndBack()">
+              Reset & New Report
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- update -->
+
+    <script>
+      const COURSES = [
+        { name: "Youtube-(full video)", key: "youtube" },
+        { name: "Youtube-(cut video)", key: "youtube_cut_video" },
+        { name: "48th BCS Viva Batch", key: "48th_bcs_viva_batch" },
+        {
+          name: "A Complete Solution of Surgery",
+          key: "a_complete_solution_of_surgery",
+        },
+        { name: "ABC of MBBS", key: "abc_of_mbbs" },
+        { name: "Abdomen Card", key: "abdomen_card" },
+        {
+          name: "Acid Base & Clinical Biochemistry",
+          key: "acid_base_and_clinical_biochemistry",
+        },
+        {
+          name: "Anatomy First term For BDS",
+          key: "anatomy_first_term_for_bds",
+        },
+        {
+          name: "Anatomy Second term For BDS",
+          key: "anatomy_second_term_for_bds",
+        },
+        {
+          name: "Anatomy in a Nutshell: 1st Prof Crash Course",
+          key: "anatomy_in_a_nutshell_1st_prof_crash_course",
+        },
+        { name: "Art of History Taking", key: "art_of_history_taking" },
+        { name: "Autonomic Pharmacology", key: "autonomic_pharmacology" },
+        { name: "Basic Intern Skills", key: "basic_intern_skills" },
+        {
+          name: "Basic Principles of Surgery",
+          key: "basic_principles_of_surgery",
+        },
+        {
+          name: "Basics of Infertility for GP",
+          key: "basics_of_infertility_for_gp",
+        },
+        { name: "Basics of X-ray", key: "basics_of_x_ray" },
+        {
+          name: "BDS Dedicated First Term (Anatomy, Physiology & Biochemistry)",
+          key: "bds_dedicated_first_term_anatomy_physiology_biochemistry",
+        },
+        {
+          name: "BDS Dedicated Second Term (Anatomy, Physiology & Bic",
+          key: "bds_dedicated_second_term_anatomy_physiology_bic",
+        },
+        {
+          name: "BEGINNER'S GUIDE TO MEDICAL RESEARCH",
+          key: "beginners_guide_to_medical_research",
+        },
+        { name: "Bailey and Love Course", key: "bailey_and_love_course" },
+        { name: "Biostat", key: "biostat" },
+        { name: "Bird's Eye View Batch", key: "birds_eye_view_batch" },
+        {
+          name: "C & C Batch (Cawson & Carranza)",
+          key: "c_and_c_batch_cawson_and_carranza",
+        },
+        { name: "Card Cracker 1", key: "card_cracker_1" },
+        { name: "Card Cracker 2", key: "card_cracker_2" },
+        { name: "Card Cracker 3", key: "card_cracker_3" },
+        { name: "Card Cracker 4", key: "card_cracker_4" },
+        { name: "Card Cracker 5", key: "card_cracker_5" },
+        { name: "Card Cracker 6", key: "card_cracker_6" },
+        {
+          name: "Clinical Correlation of Endocrine Physiology",
+          key: "clinical_correlation_of_endocrine_physiology",
+        },
+        { name: "Commed Crusher 1.0", key: "commed_crusher_1_0" },
+        { name: "Commed Crusher 2.0", key: "commed_crusher_2_0" },
+        {
+          name: "Community Medicine Full Course",
+          key: "community_medicine_full_course",
+        },
+        {
+          name: "Confidently Manage Hypertension",
+          key: "confidently_manage_hypertension",
+        },
+        {
+          name: "Conservative & Endodontics",
+          key: "conservative_and_endodontics",
+        },
+        { name: "Course on EYE & ENT", key: "course_on_eye_and_ent" },
+        { name: "Course on Neuro-imaging", key: "course_on_neuro_imaging" },
+        { name: "Course on Ultrasonography", key: "course_on_ultrasonography" },
+        { name: "Davidson Batch", key: "davidson_batch" },
+        { name: "Davidson Pro Batch", key: "davidson_pro_batch" },
+        { name: "Decode THE OPG", key: "decode_the_opg" },
+        {
+          name: "Dental Anatomy (full course)",
+          key: "dental_anatomy_full_course",
+        },
+        { name: "Dental Morphology", key: "dental_morphology" },
+        { name: "Dental pharmacology", key: "dental_pharmacology" },
+        { name: "ECG Course", key: "ecg_course" },
+        {
+          name: "Essential Biochemistry for BDS",
+          key: "essential_biochemistry_for_bds",
+        },
+        {
+          name: "Essential Medicine for BDS",
+          key: "essential_medicine_for_bds",
+        },
+        {
+          name: "Essential Pathology for BDS",
+          key: "essential_pathology_for_bds",
+        },
+        {
+          name: "Essential Physiology for BDS",
+          key: "essential_physiology_for_bds",
+        },
+        {
+          name: "Essentials of Dental Anatomy",
+          key: "essentials_of_dental_anatomy",
+        },
+        { name: "Excellence in Antibiotics", key: "excellence_in_antibiotics" },
+        { name: "Exploring Embryology", key: "exploring_embryology" },
+        { name: "Fabulous Forensic 1.0", key: "fabulous_forensic_1_0" },
+        { name: "Fabulous Forensic 2.0", key: "fabulous_forensic_2_0" },
+        {
+          name: "FCPS Gynae & Obs Full Course",
+          key: "fcps_gynae_and_obs_full_course",
+        },
+        { name: "Feel the MEDICINE", key: "feel_the_medicine" },
+        {
+          name: "Final Prof all in one Rapid Review",
+          key: "final_prof_all_in_one_rapid_review",
+        },
+        { name: "Final Prof Crash Course", key: "final_prof_crash_course" },
+        {
+          name: "First Term Dental Anatomy and SDM",
+          key: "first_term_dental_anatomy_and_sdm",
+        },
+        {
+          name: "Fluid Electrolyte and Nutrition Management (Old)",
+          key: "fluid_electrolyte_and_nutrition_management_old",
+        },
+        {
+          name: "Fluid, Electrolyte & Nutrition Management (New)",
+          key: "fluid_electrolyte_and_nutrition_management_new",
+        },
+        { name: "Forensic Full Course", key: "forensic_full_course" },
+        {
+          name: "Foundations of General Pathology: A Robbins-Based Course",
+          key: "foundations_of_general_pathology_a_robbins_based_course",
+        },
+        {
+          name: "Full Course on Gynaecology & Obstetrics",
+          key: "full_course_on_gynaecology_and_obstetrics",
+        },
+        { name: "General Pathology", key: "general_pathology" },
+        { name: "General Pharmacology", key: "general_pharmacology" },
+        { name: "Genetics", key: "genetics" },
+        {
+          name: "Gynae & Obs Detailed Course (FCPS Focused)",
+          key: "gynae_and_obs_detailed_course_fcps_focused",
+        },
+        { name: "Hematology", key: "hematology" },
+        {
+          name: "History taking and Clinical Examination course",
+          key: "history_taking_and_clinical_examination_course",
+        },
+        {
+          name: "How to Publish Medical Case Reports",
+          key: "how_to_publish_medical_case_reports",
+        },
+        {
+          name: "Master Course for Intern, GP and Paediatrician",
+          key: "master_course_for_intern_gp_and_paediatrician",
+        },
+        {
+          name: "Mastering Maxillofacial surgery",
+          key: "mastering_maxillofacial_surgery",
+        },
+        {
+          name: "Medicine Short case and Long case",
+          key: "medicine_short_case_and_long_case",
+        },
+        { name: "Metabolism Card", key: "metabolism_card" },
+        { name: "Microbiology 1st Term", key: "microbiology_1st_term" },
+        {
+          name: "Microbiology 1st Term (Parasitology)",
+          key: "microbiology_1st_term_parasitology",
+        },
+        { name: "Microbiology 2nd Term", key: "microbiology_2nd_term" },
+        {
+          name: "Microbiology 2nd term (Bacteriology, Virology)",
+          key: "microbiology_2nd_term_bacteriology_virology",
+        },
+        { name: "Microbiology Full Course", key: "microbiology_full_course" },
+        { name: "Microbiology Rapid Review", key: "microbiology_rapid_review" },
+        {
+          name: "Most Common 120 Diseases of Medicine",
+          key: "most_common_120_diseases_of_medicine",
+        },
+        { name: "Most Common 200 Drugs", key: "most_common_200_drugs" },
+        {
+          name: "Most Common Gynae and Obs Counselling",
+          key: "most_common_gynae_and_obs_counselling",
+        },
+        {
+          name: "MRCP - Notes & Passmedicine Batch",
+          key: "mrcp_notes_and_passmedicine_batch",
+        },
+        {
+          name: "Neuroanatomy And Neurophysiology",
+          key: "neuroanatomy_and_neurophysiology",
+        },
+        { name: "Orthodontics Made Easy", key: "orthodontics_made_easy" },
+        { name: "Pathology 1st Term", key: "pathology_1st_term" },
+        { name: "Pathology 2nd Term", key: "pathology_2nd_term" },
+        { name: "Pathology Full Course", key: "pathology_full_course" },
+        { name: "PEARLS OF HISTOLOGY", key: "pearls_of_histology" },
+        { name: "Pediatrics for final prof", key: "pediatrics_for_final_prof" },
+        { name: "Pharmacology 1st Term", key: "pharmacology_1st_term" },
+        { name: "Pharmacology 2nd Term", key: "pharmacology_2nd_term" },
+        { name: "Pharmacology Full Course", key: "pharmacology_full_course" },
+        { name: "Physiology Crash Course", key: "physiology_crash_course" },
+        {
+          name: "Physiology for Post Graduation",
+          key: "physiology_for_post_graduation",
+        },
+        { name: "Post Grad Pathology", key: "post_grad_pathology" },
+        {
+          name: "Post Grad Pharmacology & Microbiology",
+          key: "post_grad_pharmacology_and_microbiology",
+        },
+        {
+          name: "Protocols in Surgical Ward Practices",
+          key: "protocols_in_surgical_ward_practices",
+        },
+        {
+          name: "Prosthodontics Made Easy",
+          key: "prosthodontics_Made_Easy",
+        },
+        { name: "RFST & Day Visit (A to Z)", key: "rfst_and_day_visit_a_to_z" },
+        {
+          name: "Science of Dental Materials (full course)",
+          key: "science_of_dental_materials_full_course",
+        },
+        { name: "SDM crash course", key: "sdm_crash_course" },
+        {
+          name: "Second Term SDM & Dental Anatomy",
+          key: "second_term_sdm_and_dental_anatomy",
+        },
+        {
+          name: "Skin and Psychiatry for Final Prof",
+          key: "skin_and_psychiatry_for_final_prof",
+        },
+        {
+          name: "Special BCS & BMDC Licensing Exam Discussion",
+          key: "special_bcs_and_bmdc_licensing_exam_discussion",
+        },
+        {
+          name: "Surgery Short Cases & Long Cases",
+          key: "surgery_short_cases_and_long_cases",
+        },
+        { name: "Term Mastery 1.0", key: "term_mastery_1_0" },
+        { name: "Term Mastery 2.0", key: "term_mastery_2_0" },
+        { name: "Workshop on Pedi Dose", key: "workshop_on_pedi_dose" },
+        { name: "Xplaining X-ray", key: "xplaining_x_ray" },
+      ];
+      // --- Build form inputs from COURSES ---
+      const grid = document.getElementById("courseGrid");
+      COURSES.forEach(({ name, key }) => {
+        grid.insertAdjacentHTML(
+          "beforeend",
+          `
+                <div class="video-course-item">
+                  <span class="course-name">${name}</span>
+                  <input type="number" class="course-input" data-key="${key}" min="0" placeholder="0" />
+                </div>
+              `,
+        );
+      });
+
+      // Set today's date as default
+      document.getElementById("reportDate").valueAsDate = new Date();
+
+      // --- Helpers ---
+      function showPage(pageId) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"));
+        document.getElementById(pageId).classList.add("active");
+      }
+
+      function getInputValues() {
+        return COURSES.map(({ name, key }) => ({
+          name,
+          count:
+            parseInt(document.querySelector(`[data-key="${key}"]`).value) || 0,
+        }));
+      }
+
+      function clearInputs() {
+        document
+          .querySelectorAll(".course-input")
+          .forEach((input) => (input.value = 0));
+      }
+
+      // --- Actions ---
+      function generateReport() {
+        const date = document.getElementById("reportDate").value;
+        if (!date) {
+          alert("Please select a date!");
+          return;
+        }
+
+        document.getElementById("reportDateDisplay").textContent = new Date(
+          date,
+        ).toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+
+        const entries = getInputValues().filter((e) => e.count > 0);
+        const total = entries.reduce((sum, e) => sum + e.count, 0);
+
+        const rows = entries.length
+          ? entries
+              .map(
+                ({ name, count }) => `
+                    <div class="report-course">
+                      <span class="report-course-name">${name}</span>
+                      <span class="report-course-count">${count}</span>
+                    </div>`,
+              )
+              .join("")
+          : '<div class="no-data">No video uploads recorded for this date.</div>';
+
+        document.getElementById("reportContent").innerHTML = `
+                ${rows}
+                <div class="total-section">
+                  <div class="total-title">Total Video Uploads</div>
+                  <div class="total-count">${total}</div>
+                </div>
+              `;
+
+        showPage("reportPage");
+      }
+
+      function resetForm() {
+        if (confirm("Are you sure you want to reset all data?")) clearInputs();
+      }
+
+      function resetAndBack() {
+        if (
+          confirm(
+            "Are you sure you want to reset all data and create a new report?",
+          )
+        ) {
+          clearInputs();
+          showPage("inputPage");
+        }
+      }
+    </script>
+  </body>
+</html>
